@@ -17,14 +17,12 @@ class Deck
   private
 
   def init_cards
-    numbers = (2..10).to_a
-    pictures = %w(J Q K A)
-    suits = %w(♠ ♣ ♥ ♦)
-
-    suits.each do |suit|
-      numbers.each { |rank| @cards << Card.new(rank, suit, rank) }
-      pictures.each do |rank|
-        points = rank == "A" ? [1, 11] : 10
+    Card.const_get(:SUITS).each do |suit|
+      Card.const_get(:NUMBERS).each do |rank|
+        @cards << Card.new(rank, suit, rank)
+      end
+      Card.const_get(:PICTURES).each do |rank|
+        points = rank == 'A' ? [1, 11] : 10
 
         cards << Card.new(rank, suit, points)
       end

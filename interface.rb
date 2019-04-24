@@ -1,17 +1,17 @@
-class Interface  
+class Interface
   PLAYER_CHOICE = [
-    { title: "Skip turn", answer: 1, action: :skip },
-    { title: "Take card", answer: 2, action: :take },
-    { title: "Open cards", answer: 3, action: :open }
-  ]
+    { title: 'Skip turn', answer: 1, action: :skip },
+    { title: 'Take card', answer: 2, action: :take },
+    { title: 'Open cards', answer: 3, action: :open }
+  ].freeze
 
   def start_game
-    puts "Blackjack"
-    puts "Game starts!"
+    puts 'Blackjack'
+    puts 'Game starts!'
   end
 
   def ask_name
-    print "Enter your name: "
+    print 'Enter your name: '
     gets.chomp
   end
 
@@ -21,26 +21,28 @@ class Interface
     puts "Game bank: #{bank}$"
   end
 
-  def show_hands(players, mode=nil)
+  def show_hands(players, mode = nil)
     print_separator
 
     players.each_with_index do |player, index|
-      print_separator("-", 20) if index > 0
-
-      hand = player.hand
+      print_separator('-', 20) if index > 0
 
       puts "#{player.name} (#{player.bank}$):"
 
-      if mode == :open || !player.is_a?(Dealer)
-        puts hand.cards.join(" + ")
-        puts "Points: #{hand.points}"
-      else
-        hand.cards.length.times do |count|
-          print " + " if count > 0
-          print "**"
-        end
-        print "\n"
-      end
+      show_hand(player, mode)
+    end
+  end
+
+  def show_hand(player, mode)
+    player_hand = player.hand
+
+    if mode == :open || !player.is_a?(Dealer)
+      puts player_hand.cards.join(' + ') + "\nPoints: #{player_hand.points}"
+    else
+      player_hand.cards.length.times do |count|
+        print count > 0 ? ' + **' : '**'
+      end      
+      print "\n"
     end
   end
 
@@ -52,7 +54,7 @@ class Interface
     print_separator
 
     if winner.nil?
-      puts "Draw!"
+      puts 'Draw!'
     else
       puts "#{winner.name} wins!"
     end
@@ -66,16 +68,18 @@ class Interface
         puts "#{choice[:answer]} - #{choice[:title]}"
       end
 
-      print "Select action: "
-      answer = gets.to_i
+      answer = select_answer
       selected = PLAYER_CHOICE.find { |item| answer == item[:answer] }
 
       next unless selected
 
       return selected[:action]
-
-      break
     end
+  end
+
+  def select_answer
+    print 'Select action: '
+    gets.to_i
   end
 
   def print_skip_turn(player)
@@ -85,24 +89,21 @@ class Interface
 
   def print_take_card(player)
     print_separator
-    puts "-#{player.name} takes a card" 
+    puts "-#{player.name} takes a card"
   end
 
   def restart_game?
     loop do
       print_separator
-      print "One more game? (Y/n): "
+      print 'One more game? (Y/n): '
       answer = gets.chomp
 
-      if ["", "Y", "y"].include?(answer)
-        return true
-      elsif ["N", "n"].include?(answer)
-        return false
-      end
+      return true if ['', 'Y', 'y'].include?(answer)
+      return false if %w[N n].include?(answer)
     end
   end
 
-  def print_separator(mark='-', length=40)
+  def print_separator(mark = '-', length = 40)
     length.times do
       print mark
     end

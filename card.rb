@@ -1,4 +1,8 @@
 class Card
+  SUITS = %w[♠ ♣ ♥ ♦].freeze
+  NUMBERS = (2..10).to_a
+  PICTURES = %w[J Q K A].freeze
+
   attr_reader :rank, :suit, :points
 
   def initialize(rank, suit, points)

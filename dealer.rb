@@ -1,5 +1,5 @@
 class Dealer < Player
-  def initialize(name="Dealer")
+  def initialize(name = 'Dealer')
     super
   end
 end

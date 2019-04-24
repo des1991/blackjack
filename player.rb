@@ -16,4 +16,10 @@ class Player
   def win(amount)
     @bank += amount
   end
+
+  def money?
+    return true if @bank > 0
+
+    false
+  end
 end

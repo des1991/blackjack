@@ -5,7 +5,7 @@ require_relative 'dealer'
 require_relative 'interface'
 
 class Blackjack
-  attr_accessor :player, :dealer,:players, :deck
+  attr_accessor :player, :dealer, :players, :deck
   attr_reader :ui
 
   def initialize(interface)
@@ -15,14 +15,9 @@ class Blackjack
   end
 
   def run
-    start_game
-    game
-  end
-
-  def start_game
     ui.start_game
-
     init_players
+    game
   end
 
   def game
@@ -31,16 +26,16 @@ class Blackjack
 
       player_choice
 
-      break unless restart? && players_has_money?
+      break unless ui.restart_game?
+
+      players.each { |player| break unless player.money? }
     end
   end
 
   private
 
   def init_players
-    player_name = ui.ask_name
-
-    self.player = Player.new(player_name)
+    self.player = Player.new(ui.ask_name)
     self.dealer = Dealer.new
 
     self.players = [@player, @dealer]
@@ -91,18 +86,28 @@ class Blackjack
   def open_cards
     ui.show_hands(players, :open)
 
-    sum_result
+    sum_result(player.hand.points, dealer.hand.points)
+
+    ui.show_banks(players)
+
+    @bank = 0
   end
 
   def dealer_choice
-    if dealer.hand.points >= 17 || dealer.hand.cards.length > 2
+    dealer_hand = dealer.hand
+
+    if dealer_hand.points >= 17 || dealer_hand.cards.length > 2
       ui.print_skip_turn(dealer)
     else
-      dealer.hand.take_cards(deck)
+      dealer_hand.take_cards(deck)
 
       ui.print_take_card(dealer)
     end
 
+    choice_route
+  end
+
+  def choice_route
     if player.hand.cards.length > 2
       open_cards
     else
@@ -112,55 +117,29 @@ class Blackjack
     end
   end
 
-  def sum_result
-    if (player.hand.points > 21)
-      win(:dealer)
-    elsif (dealer.hand.points > 21)
-      win(:player)
-    elsif (player.hand.points == dealer.hand.points)
-      win(:no_one)
-    elsif (player.hand.points > dealer.hand.points)
-      win(:player)
+  def sum_result(player_points, dealer_points)
+    if player_points > 21
+      win(dealer)
+    elsif dealer_points > 21 || player_points > dealer_points
+      win(player)
+    elsif player_points == dealer_points
+      win(nil)
     else
-      win(:dealer)
+      win(dealer)
     end
-
-    ui.show_banks(players)
   end
 
   def win(winner)
-    case winner
-      when :player
-        player.win(@bank)
+    if winner.nil?
+      half_bank = @bank / 2
 
-        ui.show_winner(player)
-      when :dealer
-        dealer.win(@bank)
-
-        ui.show_winner(dealer)
-      else
-        half_bank = @bank / 2
-
-        player.win(half_bank)
-        dealer.win(half_bank)
-
-        ui.show_winner(nil)
+      players.each { |player| player.win(half_bank) }
+    else
+      winner.win(@bank)
     end
 
-    @bank = 0
-  end
-
-  def players_has_money?
-    if player.bank > 0 && dealer.bank > 0
-      return true
-    end
-
-    false
-  end
-
-  def restart?
-    ui.restart_game?
+    ui.show_winner(winner)
   end
 end
 
-game = Blackjack.new(Interface.new).run
+Blackjack.new(Interface.new).run
