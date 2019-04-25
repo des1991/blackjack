@@ -5,8 +5,7 @@ require_relative 'dealer'
 require_relative 'interface'
 
 class Blackjack
-  attr_accessor :player, :dealer, :players, :deck
-  attr_reader :ui
+  attr_reader :ui, :player, :dealer, :players, :deck
 
   def initialize(interface)
     @bank = 0
@@ -35,10 +34,10 @@ class Blackjack
   private
 
   def init_players
-    self.player = Player.new(ui.ask_name)
-    self.dealer = Dealer.new
+    @player = Player.new(ui.ask_name)
+    @dealer = Dealer.new
 
-    self.players = [@player, @dealer]
+    @players = [@player, @dealer]
   end
 
   def init_new_game
